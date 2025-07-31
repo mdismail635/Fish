@@ -7,250 +7,107 @@
     <meta name="theme-color" content="#4CAF50">
     <link rel="manifest" href="manifest.json">
     <style>
-        
-        /* মোবাইল ডিসপ্লে অপ্টিমাইজেশন - কালার ও স্টাইল আপডেট */
+       /* Excel-like gap between rows with existing color scheme */
 @media (max-width: 768px) {
-    body {
-        padding: 3px;
-        font-size: 14px;
-        overflow-x: hidden;
-        background-color: #f8f9fa;
-    }
-    
-    .header {
-        flex-direction: column;
-        gap: 5px;
-        font-size: 14px;
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-    }
-    
-    .underline {
-        border-bottom: 2px solid white;
-        color: white;
-        padding-bottom: 2px;
-    }
-    
-    .table-container {
-        width: 100vw;
-        margin-left: -5px;
-        margin-right: -5px;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
+    /* Add gap between rows */
     table {
-        min-width: 800px;
-        overflow-x: auto;
         border-collapse: separate;
-        border-spacing: 0;
+        border-spacing: 0 3px; /* Vertical gap between rows */
     }
     
+    /* Style for each data row */
+    tr:not(:first-child) {
+        margin-bottom: 3px; /* Gap between rows */
+        background-color: white;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* Cell styling for the gap effect */
+    td {
+        border-top: 1px solid #e0e0e0;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 6px 3px;
+    }
+    
+    /* First cell in each row */
+    td:first-child {
+        border-left: 1px solid #e0e0e0;
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+    }
+    
+    /* Last cell in each row */
+    td:last-child {
+        border-right: 1px solid #e0e0e0;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+    
+    /* Header row styling */
     th {
-        background-color: #2E7D32;
-        color: white;
-        position: sticky;
-        top: 0;
-        font-weight: 600;
+        border: none !important;
         padding: 8px 3px;
     }
     
-    td {
-        background-color: white;
-    }
-    
+    /* Even row coloring */
     tr:nth-child(even) td {
-        background-color: #f1f8e9;
+        background-color: #f5f5f5;
     }
     
-    .page-controls, .backup-controls {
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-        background-color: #e8f5e9;
-        padding: 10px;
-        border-radius: 8px;
-        margin: 10px 0;
-    }
+    /* Adjust column widths to prevent wholesaler columns from breaking */
+    .serial { width: 40px !important; }
+    .fish-name { width: 80px !important; }
+    .maund-rate { width: 80px !important; }
+    .rate { width: 60px !important; }
+    .kg { width: 60px !important; }
+    .amount { width: 80px !important; }
+    .wholesaler { width: 100px !important; }
+    .wholesale-total { width: 90px !important; }
     
-    .page-btn, .backup-btn, .zoom-btn {
-        padding: 8px 12px;
-        font-size: 12px;
-        width: 100%;
-        max-width: 180px;
-        font-weight: bold;
-        transition: all 0.3s;
-    }
-    
-    .page-btn {
-        background-color: #4CAF50;
-    }
-    
-    .backup-btn {
-        background-color: #2196F3;
-    }
-    
-    .zoom-btn {
-        background-color: #FF9800;
-    }
-    
-    .page-btn:hover, .backup-btn:hover, .zoom-btn:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-    }
-    
-    .page-tabs {
-        justify-content: center;
-        overflow-x: auto;
-        padding-bottom: 5px;
-        background-color: #e8f5e9;
-        padding: 8px;
-        border-radius: 8px;
-    }
-    
-    .page-tab {
-        padding: 5px 10px;
-        font-size: 12px;
-        background-color: #c8e6c9;
-        color: #2E7D32;
-    }
-    
-    .page-tab.active {
-        background-color: #4CAF50;
-        color: white;
-        font-weight: bold;
-    }
-    
-    /* কলাম প্রস্থ সামঞ্জস্য */
-    .serial { width: 15px; }
-    .fish-name { width: 40px; }
-    .maund-rate { width: 50px; }
-    .rate { width: 40px; }
-    .kg { width: 40px; }
-    .amount { width: 60px; }
-    .wholesaler { width: 70px; }
-    .wholesale-total { width: 70px; }
-    
-    /* ইনপুট ফিল্ড স্টাইল */
+    /* Input field styling */
     .input-cell {
-        padding: 5px;
-        font-size: 12px;
         border: 1px solid #bdbdbd;
-        border-radius: 4px;
         background-color: white;
+        border-radius: 3px;
+        padding: 4px;
     }
     
-    .input-cell:focus {
-        border-color: #4CAF50;
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-    }
-    
-    /* জুম কন্ট্রোল */
-    .zoom-controls {
-        position: fixed;
-        bottom: 20px;
-        right: 15px;
-        z-index: 100;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .zoom-btn {
-        width: 50px;
-        height: 50px;
-        padding: 0;
-        border-radius: 50%;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        font-size: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* টোটাল রো স্টাইল */
-    .total-row {
+    /* Keep existing color scheme */
+    .total-row td {
         background-color: #bbdefb !important;
         color: #0d47a1;
+        font-weight: bold;
     }
     
     .sum-cell {
-        background-color: #ffecb3;
+        background-color: #ffecb3 !important;
         color: #ff6f00;
-        font-weight: bold;
     }
     
-    .wholesaler-summary-row {
+    .wholesaler-summary-row td {
         background-color: #e8f5e9 !important;
         color: #2E7D32;
     }
     
-    .first-occurrence {
-        background-color: #fffde7;
-    }
-    
-    .confirmation {
-        background-color: #4CAF50;
-        font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    
-    .install-btn {
-        background-color: #FF9800;
-        font-weight: bold;
+    .first-occurrence td {
+        background-color: #fffde7 !important;
     }
 }
 
-/* অতিরিক্ত ছোট ডিভাইসের জন্য (320px-480px) */
+/* Fix for very small screens */
 @media (max-width: 480px) {
-    body {
-        font-size: 13px;
-    }
-    
-    th, td {
-        padding: 5px 2px;
-    }
-    
-    .page-btn, .backup-btn {
-        max-width: 160px;
-        padding: 7px 10px;
+    td, th {
+        padding: 4px 2px !important;
     }
     
     .input-cell {
-        padding: 4px;
-        font-size: 11px;
-    }
-    
-    .zoom-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 16px;
-    }
-}
-
-/* সবচেয়ে ছোট ডিভাইসের জন্য (320px পর্যন্ত) */
-@media (max-width: 320px) {
-    body {
-        font-size: 12px;
-    }
-    
-    .page-btn, .backup-btn {
-        max-width: 140px;
-        padding: 6px 8px;
-        font-size: 11px;
-    }
-    
-    .input-cell {
-        font-size: 10px;
-    }
-}    
-
-        
+        padding: 3px !important;
+        font-size: 11px !important;
+     }
+  } 
+   
     </style>
 </head>
 <body>
