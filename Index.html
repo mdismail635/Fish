@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>মাছের দর হিসাব - উন্নত সংস্করণ</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="মাছের হিসাব">
+    
+    <!-- Google API Client Library -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 8px;
+            background-color: #f5f5f5;
+            font-size: 13px;
+            touch-action: manipulation;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .underline {
+            border-bottom: 1px solid #000;
+            margin: 3px 0;
+            display: inline-block;
+            min-width: 100px;
+            padding-bottom: 2px;
+        }
+        .controls-section {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .control-btn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+        }
+        .control-btn:hover {
+            background-color: #45a049;
+        }
+        .control-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .google-drive-btn {
+            background-color: #4285f4;
+        }
+        .google-drive-btn:hover {
+            background-color: #3367d6;
+        }
+        .excel-btn {
+            background-color: #217346;
+        }
+        .excel-btn:hover {
+            background-color: #1e6b3e;
+        }
+        .print-btn {
+            background-color: #ff6b35;
+        }
+        .print-btn:hover {
+            background-color: #e55a2b;
+        }
+        .sync-status {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            margin: 5px 0;
+        }
+        .zoom-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        .zoom-btn {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #ddd;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 5px 3px;
+            text-align: center;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            font-size: 12px;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .input-cell {
+            width: 100%;
+            padding: 3px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            box-sizing: border-box;
+            font-size: 12px;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #e6f7ff;
+        }
+        .serial {
+            width: 30px;
+        }
+        .fish-name {
+            width: 50px;
+        }
+        .maund-rate {
+            width: 80px;
+        }
+        .rate {
+            width: 50px;
+        }
+        .kg {
+            width: 50px;
+        }
+        .amount {
+            width: 70px;
+            min-width: 70px;
+        }
+        .wholesaler {
+            width: 90px;
+        }
+        .wholesale-total {
+            width: 80px;
+            font-weight: bold;
+        }
+        .sum-cell {
+            background-color: #fffacd;
+            font-weight: bold;
+        }
+        .first-occurrence {
+            background-color: #ffffcc;
+        }
+        .total-row-highlight {
+            background-color: #ffeb99;
+            font-weight: bold;
+        }
+        .empty-cell {
+            color: transparent;
+        }
+        .page-controls {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .page-btn {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .page-info {
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+        .page-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .page-tab {
+            padding: 5px 10px;
+            background-color: #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .page-tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .wholesaler-summary-row {
+            background-color: #f0fff0;
+        }
+        
+        /* Print styles */
+        @media print {
+            .controls-section,
+            .zoom-controls,
+            .page-controls,
+            .page-tabs,
+            .sync-status {
+                display: none !important;
+            }
+            
+            body {
+                background-color: white;
+                font-size: 12px;
+            }
+            
+            .table-container {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+            
+            th, td {
+                border: 1px solid #000;
+                padding: 3px;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            th, td {
+                padding: 4px 2px;
+                font-size: 11px;
+            }
+            .fish-name {
+                width: 60px;
+            }
+            .maund-rate {
+                width: 70px;
+            }
+            .rate, .kg {
+                width: 40px;
+            }
+            .amount {
+                width: 50px;
+            }
+            .wholesaler {
+                width: 70px;
+            }
+            .wholesale-total {
+                width: 60px;
+            }
+            .control-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .modal-btn-confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .modal-btn-cancel {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>পার্টি নাম: <span class="underline" contenteditable="true" id="partyName">&nbsp;</span></div>
+        <div>তারিখ: <span class="underline" id="dateField" contenteditable="true">&nbsp;</span></div>
+    </div>
+
+    <!-- Enhanced Controls Section -->
+    <div class="controls-section">
+        <button class="control-btn google-drive-btn" id="googleDriveBtn" onclick="toggleGoogleDrive()">
+            গুগল ড্রাইভ সংযোগ
+        </button>
+        <button class="control-btn" id="syncBtn" onclick="syncToGoogleDrive()" disabled>
+            সিঙ্ক করুন
+        </button>
+        <button class="control-btn excel-btn" onclick="exportToExcel()">
+            এক্সেল এক্সপোর্ট
+        </button>
+        <button class="control-btn print-btn" onclick="printPage()">
+            প্রিন্ট করুন
+        </button>
+    </div>
+    
+    <div class="sync-status" id="syncStatus">
+        স্থানীয় সংরক্ষণ সক্রিয়
+    </div>
+
+    <div class="page-tabs" id="pageTabs"></div>
+
+    <div class="page-controls">
+        <button class="page-btn" onclick="addNewPage()">নতুন পেজ (+)</button>
+        <div class="page-info">পেজ: <span id="currentPage">1</span></div>
+        <div>
+            <button class="page-btn" onclick="prevPage()">পূর্ববর্তী</button>
+            <button class="page-btn" onclick="nextPage()">পরবর্তী</button>
+        </div>
+    </div>
+
+    <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomOut()">জুম আউট (-)</button>
+        <button class="zoom-btn" onclick="zoomIn()">জুম ইন (+)</button>
+    </div>
+
+    <div class="table-container" id="tableContainer">
+        <table id="fishTable">
+            <thead>
+                <tr>
+                    <th class="serial">ক্রমিক</th>
+                    <th class="fish-name">মাছের নাম</th>
+                    <th class="maund-rate">মন দর</th>
+                    <th class="rate">দর</th>
+                    <th class="kg">কেজি</th>
+                    <th class="amount">টাকা</th>
+                    <th class="wholesaler">পাইকার নাম</th>
+                    <th class="wholesale-total">পাইকার মোট</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows will be added automatically by JavaScript -->
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="5" style="text-align: right;">মোট টাকা =</td>
+                    <td id="totalTk" class="sum-cell">0</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="4">পেজ মোট</td>
+                    <td id="totalKg">0</td>
+                    <td id="sumTk">0</td>
+                    <td colspan="2" id="totalWholesale" class="sum-cell">0</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="4">সর্বমোট (সকল পেজ)</td>
+                    <td id="grandTotalKg">0</td>
+                    <td id="grandSumTk">0</td>
+                    <td colspan="2" id="grandTotalWholesale" class="sum-cell">0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <p id="confirmMessage">আপনি কি নিশ্চিত?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-confirm" onclick="confirmAction()">হ্যাঁ</button>
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">না</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentZoom = 100;
+        const WHOLESALER_RATE = 1.03;
+        let pages = [];
+        let currentPageIndex = 0;
+        const ROWS_PER_PAGE = 60;
+        let currentDate = '';
+        let allWholesalers = {};
+        const WHOLESALER_SUMMARY_START_ROW = 1;
+        
+        // Google Drive integration variables
+        let isGoogleDriveConnected = false;
+        let gapi = null;
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // User needs to replace this
+        const API_KEY = 'YOUR_GOOGLE_API_KEY'; // User needs to replace this
+        
+        // Auto-save and sync variables
+        let autoSaveInterval;
+        let lastSyncTime = null;
+        let pendingConfirmAction = null;
+        
+        // Mobile storage and PWA variables
+        let isOnline = navigator.onLine;
+        let deferredPrompt;
+        let serviceWorkerRegistration;
+        
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+        
+        function initializeApp() {
+            // Set today's date
+            const today = new Date();
+            currentDate = today.getDate() + '/' + (today.getMonth()+1) + '/' + today.getFullYear();
+            document.getElementById('dateField').textContent = currentDate;
+            
+            // Load data from localStorage
+            loadFromLocalStorage();
+            
+            // If no data exists, initialize first page
+            if (pages.length === 0) {
+                addNewPage();
+            }
+            
+            renderPage(currentPageIndex);
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Initialize mobile and offline features
+            initializeMobileFeatures();
+            
+            // Initialize Google API
+            initializeGoogleAPI();
+            
+            // Start auto-save
+            startAutoSave();
+            
+            updateSyncStatus('স্থানীয় সংরক্ষণ সক্রিয়');
+        }
+        
+        function setupEventListeners() {
+            // Date field listener
+            document.getElementById('dateField').addEventListener('input', function() {
+                currentDate = this.textContent;
+                updateAllWholesalers();
+                updatePageTotals();
+                updateWholesalerSummary();
+                saveToLocalStorage();
+            });
+            
+            // Party name listener
+            document.getElementById('partyName').addEventListener('input', function() {
+                saveToLocalStorage();
+            });
+            
+            // Prevent accidental page refresh
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsavedChanges()) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+            
+            // Online/offline status monitoring
+            window.addEventListener('online', function() {
+                isOnline = true;
+                updateSyncStatus('ইন্টারনেট সংযোগ পুনরুদ্ধার হয়েছে');
+                // Try to sync when coming back online
+                if (isGoogleDriveConnected) {
+                    setTimeout(() => syncToGoogleDrive(), 2000);
+                }
+            });
+            
+            window.addEventListener('offline', function() {
+                isOnline = false;
+                updateSyncStatus('অফলাইন মোড - শুধুমাত্র স্থানীয় সংরক্ষণ');
+            });
+        } 
+      // Mobile and PWA features
+        function initializeMobileFeatures() {
+            // Check if app is running in standalone mode (PWA)
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                updateSyncStatus('PWA মোডে চালু');
+            }
+            
+            // Handle install prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                showInstallButton();
+            });
+            
+            // Handle app installed
+            window.addEventListener('appinstalled', (evt) => {
+                updateSyncStatus('অ্যাপ ইনস্টল সম্পন্ন');
+                hideInstallButton();
+            });
+            
+            // Enhanced touch support for mobile
+            document.addEventListener('touchstart', function() {}, {passive: true});
+            
+            // Prevent zoom on double tap for better mobile experience
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Initialize IndexedDB for better mobile storage
+            initializeIndexedDB();
+        }
+        
+        // IndexedDB for enhanced mobile storage
+        function initializeIndexedDB() {
+            if (!window.indexedDB) {
+                console.log('IndexedDB not supported, using localStorage');
+                return;
+            }
+            
+            const request = indexedDB.open('FishCalculatorDB', 1);
+            
+            request.onerror = function(event) {
+                console.log('IndexedDB error:', event.target.error);
+            };
+            
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                console.log('IndexedDB initialized successfully');
+                
+                // Migrate data from localStorage to IndexedDB if needed
+                migrateToIndexedDB(db);
+            };
+            
+            request.onupgradeneeded = function(event) {
+                const db = event.target.result;
+                
+                // Create object store for fish calculator data
+                if (!db.objectStoreNames.contains('fishData')) {
+                    const objectStore = db.createObjectStore('fishData', { keyPath: 'id' });
+                    objectStore.createIndex('timestamp', 'timestamp', { unique: false });
+                }
+                
+                // Create object store for backups
+                if (!db.objectStoreNames.contains('backups')) {
+                    const backupStore = db.createObjectStore('backups', { keyPath: 'id', autoIncrement: true });
+                    backupStore.createIndex('timestamp', 'timestamp', { unique: false });
+                }
+            };
+        }
+        
+        function migrateToIndexedDB(db) {
+            const savedData = localStorage.getItem('fishCalculatorData');
+            if (savedData) {
+                const transaction = db.transaction(['fishData'], 'readwrite');
+                const objectStore = transaction.objectStore('fishData');
+                
+                const data = JSON.parse(savedData);
+                data.id = 'current';
+                data.timestamp = new Date().toISOString();
+                
+                objectStore.put(data);
+                console.log('Data migrated to IndexedDB');
+            }
+        }
+        
+        function saveToIndexedDB(data) {
+            if (!window.indexedDB) return;
+            
+            const request = indexedDB.open('FishCalculatorDB', 1);
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                const transaction = db.transaction(['fishData'], 'readwrite');
+                const objectStore = transaction.objectStore('fishData');
+                
+                data.id = 'current';
+                data.timestamp = new Date().toISOString();
+                
+                objectStore.put(data);
+            };
+        }
+        
+        function loadFromIndexedDB(callback) {
+            if (!window.indexedDB) {
+                callback(null);
+                return;
+            }
+            
+            const request = indexedDB.open('FishCalculatorDB', 1);
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                const transaction = db.transaction(['fishData'], 'readonly');
+                const objectStore = transaction.objectStore('fishData');
+                
+                const getRequest = objectStore.get('current');
+                getRequest.onsuccess = function(event) {
+                    callback(event.target.result);
+                };
+                
+                getRequest.onerror = function(event) {
+                    callback(null);
+                };
+            };
+            
+            request.onerror = function(event) {
+                callback(null);
+            };
+        }
+        
+        // Enhanced backup system
+        function createBackup() {
+            const backupData = {
+                pages: pages,
+                allWholesalers: allWholesalers,
+                currentDate: currentDate,
+                partyName: document.getElementById('partyName').textContent,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            // Save to IndexedDB backups
+            if (window.indexedDB) {
+                const request = indexedDB.open('FishCalculatorDB', 1);
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    const transaction = db.transaction(['backups'], 'readwrite');
+                    const objectStore = transaction.objectStore('backups');
+                    
+                    objectStore.add(backupData);
+                    
+                    // Keep only last 10 backups
+                    cleanupOldBackups(db);
+                };
+            }
+            
+            // Also save to localStorage as fallback
+            const backups = JSON.parse(localStorage.getItem('fishCalculatorBackups') || '[]');
+            backups.push(backupData);
+            
+            // Keep only last 5 backups in localStorage
+            if (backups.length > 5) {
+                backups.splice(0, backups.length - 5);
+            }
+            
+            localStorage.setItem('fishCalculatorBackups', JSON.stringify(backups));
+        }
+        
+        function cleanupOldBackups(db) {
+            const transaction = db.transaction(['backups'], 'readwrite');
+            const objectStore = transaction.objectStore('backups');
+            const index = objectStore.index('timestamp');
+            
+            const request = index.openCursor(null, 'prev');
+            let count = 0;
+            
+            request.onsuccess = function(event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    count++;
+                    if (count > 10) {
+                        cursor.delete();
+                    }
+                    cursor.continue();
+                }
+            };
+        }
+        
+        // Install button functions
+        function showInstallButton() {
+            // Add install button to controls if not exists
+            const controlsSection = document.querySelector('.controls-section');
+            if (!document.getElementById('installBtn')) {
+                const installBtn = document.createElement('button');
+                installBtn.id = 'installBtn';
+                installBtn.className = 'control-btn';
+                installBtn.textContent = 'অ্যাপ ইনস্টল করুন';
+                installBtn.onclick = installApp;
+                controlsSection.appendChild(installBtn);
+            }
+        }
+        
+        function hideInstallButton() {
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) {
+                installBtn.remove();
+            }
+        }
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        updateSyncStatus('অ্যাপ ইনস্টল করা হচ্ছে...');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        // Local Storage Functions
+        function saveToLocalStorage() {
+            try {
+                const data = {
+                    pages: pages,
+                    allWholesalers: allWholesalers,
+                    currentPageIndex: currentPageIndex,
+                    currentDate: currentDate,
+                    partyName: document.getElementById('partyName').textContent,
+                    lastSaved: new Date().toISOString()
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('fishCalculatorData', JSON.stringify(data));
+                
+                // Also save to IndexedDB if available
+                saveToIndexedDB(data);
+                
+                // Create backup every 10 saves
+                const saveCount = parseInt(localStorage.getItem('saveCount') || '0') + 1;
+                localStorage.setItem('saveCount', saveCount.toString());
+                
+                if (saveCount % 10 === 0) {
+                    createBackup();
+                }
+                
+                updateSyncStatus('স্থানীয়ভাবে সংরক্ষিত: ' + new Date().toLocaleTimeString('bn-BD'));
+            } catch (error) {
+                console.error('স্থানীয় সংরক্ষণে ত্রুটি:', error);
+                updateSyncStatus('স্থানীয় সংরক্ষণে ত্রুটি');
+            }
+        }
+        
+        function loadFromLocalStorage() {
+            try {
+                // First try to load from localStorage
+                const savedData = localStorage.getItem('fishCalculatorData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    loadDataFromObject(data);
+                    updateSyncStatus('ডেটা লোড হয়েছে: ' + new Date(data.lastSaved).toLocaleTimeString('bn-BD'));
+                    return;
+                }
+                
+                // If localStorage is empty, try IndexedDB
+                loadFromIndexedDB((data) => {
+                    if (data) {
+                        loadDataFromObject(data);
+                        updateSyncStatus('IndexedDB থেকে ডেটা লোড হয়েছে');
+                    }
+                });
+                
+            } catch (error) {
+                console.error('ডেটা লোডে ত্রুটি:', error);
+                updateSyncStatus('ডেটা লোডে ত্রুটি');
+            }
+        }
+          function loadDataFromObject(data) {
+            pages = data.pages || [];
+            allWholesalers = data.allWholesalers || {};
+            currentPageIndex = data.currentPageIndex || 0;
+            currentDate = data.currentDate || '';
+            
+            if (data.partyName) {
+                document.getElementById('partyName').textContent = data.partyName;
+            }
+            if (data.currentDate) {
+                document.getElementById('dateField').textContent = data.currentDate;
+            }
+        }
+        
+        // Google Drive Integration
+        async function initializeGoogleAPI() {
+            try {
+                if (typeof gapi !== 'undefined') {
+                    await new Promise((resolve) => gapi.load('api:auth2', resolve));
+                    await gapi.api.init({
+                        apiKey: API_KEY,
+                        clientId: CLIENT_ID,
+                        discoveryDocs: [DISCOVERY_DOC],
+                        scope: SCOPES
+                    });
+                    
+                    const authInstance = gapi.auth2.getAuthInstance();
+                    if (authInstance.isSignedIn.get()) {
+                        isGoogleDriveConnected = true;
+                        updateGoogleDriveButton();
+                    }
+                }
+            } catch (error) {
+                console.error('Google API initialization error:', error);
+                updateSyncStatus('Google Drive সংযোগে সমস্যা');
+            }
+        }
+        
+        async function toggleGoogleDrive() {
+            if (!gapi) {
+                alert('Google API লোড হয়নি। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।');
+                return;
+            }
+            
+            try {
+                const authInstance = gapi.auth2.getAuthInstance();
+                
+                if (isGoogleDriveConnected) {
+                    await authInstance.signOut();
+                    isGoogleDriveConnected = false;
+                    updateSyncStatus('Google Drive থেকে সংযোগ বিচ্ছিন্ন');
+                } else {
+                    await authInstance.signIn();
+                    isGoogleDriveConnected = true;
+                    updateSyncStatus('Google Drive সংযুক্ত');
+                    // Auto-sync after connection
+                    setTimeout(() => syncToGoogleDrive(), 1000);
+                }
+                
+                updateGoogleDriveButton();
+            } catch (error) {
+                console.error('Google Drive authentication error:', error);
+                updateSyncStatus('Google Drive সংযোগে ত্রুটি');
+            }
+        }
+        
+        function updateGoogleDriveButton() {
+            const btn = document.getElementById('googleDriveBtn');
+            const syncBtn = document.getElementById('syncBtn');
+            
+            if (isGoogleDriveConnected) {
+                btn.textContent = 'ড্রাইভ সংযুক্ত ✓';
+                btn.style.backgroundColor = '#0f9d58';
+                syncBtn.disabled = false;
+            } else {
+                btn.textContent = 'গুগল ড্রাইভ সংযোগ';
+                btn.style.backgroundColor = '#4285f4';
+                syncBtn.disabled = true;
+            }
+        }
+        
+        async function syncToGoogleDrive() {
+            if (!isGoogleDriveConnected) {
+                alert('প্রথমে Google Drive এর সাথে সংযোগ করুন।');
+                return;
+            }
+            
+            if (!isOnline) {
+                updateSyncStatus('অফলাইন মোড - ইন্টারনেট সংযোগ প্রয়োজন');
+                return;
+            }
+            
+            try {
+                updateSyncStatus('Google Drive এ সিঙ্ক করা হচ্ছে...');
+                
+                const data = {
+                    pages: pages,
+                    allWholesalers: allWholesalers,
+                    currentDate: currentDate,
+                    partyName: document.getElementById('partyName').textContent,
+                    lastSynced: new Date().toISOString()
+                };
+                
+                const fileContent = JSON.stringify(data, null, 2);
+                const fileName = `মাছের_হিসাব_${currentDate.replace(/\//g, '_')}.json`;
+                
+                // Check if file exists
+                const existingFile = await findFileByName(fileName);
+                
+                if (existingFile) {
+                    // Update existing file
+                    await updateFile(existingFile.id, fileContent);
+                } else {
+                    // Create new file
+                    await createFile(fileName, fileContent);
+                }
+                
+                lastSyncTime = new Date();
+                updateSyncStatus('Google Drive এ সিঙ্ক সম্পন্ন: ' + lastSyncTime.toLocaleTimeString('bn-BD'));
+                
+            } catch (error) {
+                console.error('Google Drive sync error:', error);
+                updateSyncStatus('Google Drive সিঙ্কে ত্রুটি');
+            }
+        }
+        
+        async function findFileByName(fileName) {
+            try {
+                const response = await gapi.client.drive.files.list({
+                    q: `name='${fileName}' and trashed=false`,
+                    fields: 'files(id, name)'
+                });
+                
+                return response.result.files.length > 0 ? response.result.files[0] : null;
+            } catch (error) {
+                console.error('Error finding file:', error);
+                return null;
+            }
+        }
+        
+        async function createFile(fileName, content) {
+            const metadata = {
+                name: fileName,
+                parents: [] // Root folder
+            };
+            
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+            form.append('file', new Blob([content], {type: 'application/json'}));
+            
+            const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                method: 'POST',
+                headers: new Headers({
+                    'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}`
+                }),
+                body: form
+            });
+            
+            return response.json();
+        }
+        
+        async function updateFile(fileId, content) {
+            const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+                method: 'PATCH',
+                headers: new Headers({
+                    'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}`,
+                    'Content-Type': 'application/json'
+                }),
+                body: content
+            });
+            
+            return response.json();
+        }
+        
+        // Excel Export Function
+        function exportToExcel() {
+            try {
+                const workbook = XLSX.utils.book_new();
+                
+                // Create summary sheet
+                const summaryData = [
+                    ['পার্টি নাম', document.getElementById('partyName').textContent || ''],
+                    ['তারিখ', currentDate],
+                    ['মোট পেজ', pages.length],
+                    [''],
+                    ['সর্বমোট কেজি', document.getElementById('grandTotalKg').textContent],
+                    ['সর্বমোট টাকা', document.getElementById('grandSumTk').textContent],
+                    ['সর্বমোট পাইকারি', document.getElementById('grandTotalWholesale').textContent]
+                ];
+                
+                const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+                XLSX.utils.book_append_sheet(workbook, summarySheet, 'সারাংশ');
+                
+                // Create sheets for each page
+                pages.forEach((page, pageIndex) => {
+                    const pageData = [
+                        ['ক্রমিক', 'মাছের নাম', 'মন দর', 'দর', 'কেজি', 'টাকা', 'পাইকার নাম', 'পাইকার মোট']
+                    ];
+                    
+                    page.rows.forEach((row, rowIndex) => {
+                        if (row.fishName || row.kg || row.maundRate) {
+                            const rowNumber = (pageIndex * ROWS_PER_PAGE) + rowIndex + 1;
+                            pageData.push([
+                                rowNumber,
+                                row.fishName || '',
+                                row.maundRate || '',
+                                row.calculatedRate || '',
+                                row.kg || '',
+                                row.calculatedAmount || '',
+                                row.wholesalerName || '',
+                                row.calculatedWholesaleTotal || ''
+                            ]);
+                        }
+                    });
+                    
+                    const pageSheet = XLSX.utils.aoa_to_sheet(pageData);
+                    XLSX.utils.book_append_sheet(workbook, pageSheet, `পেজ ${pageIndex + 1}`);
+                });
+                
+                // Create wholesaler summary sheet
+                const wholesalerData = [['পাইকার নাম', 'মোট টাকা', 'পাইকারি মোট']];
+                Object.keys(allWholesalers).forEach(name => {
+                    if (name && allWholesalers[name].totalAmount > 0) {
+                        wholesalerData.push([
+                            name,
+                            allWholesalers[name].totalAmount,
+                            allWholesalers[name].totalAmount * WHOLESALER_RATE
+                        ]);
+                    }
+                });
+                
+                const wholesalerSheet = XLSX.utils.aoa_to_sheet(wholesalerData);
+                XLSX.utils.book_append_sheet(workbook, wholesalerSheet, 'পাইকার সারাংশ');
+                
+                // Generate filename
+                const fileName = `মাছের_হিসাব_${currentDate.replace(/\//g, '_')}.xlsx`;
+                
+                // Save file
+                XLSX.writeFile(workbook, fileName);
+                
+                updateSyncStatus('Excel ফাইল ডাউনলোড সম্পন্ন');
+                
+            } catch (error) {
+                console.error('Excel export error:', error);
+                alert('Excel এক্সপোর্টে ত্রুটি হয়েছে।');
+            }
+        }
+        
+        // Print Function
+        function printPage() {
+            window.print();
+        }
+        
+        // Auto-save functionality
+        function startAutoSave() {
+            autoSaveInterval = setInterval(() => {
+                saveToLocalStorage();
+                
+                // Auto-sync to Google Drive every 15 minutes if connected
+                if (isGoogleDriveConnected && lastSyncTime) {
+                    const timeSinceLastSync = new Date() - lastSyncTime;
+                    if (timeSinceLastSync > 15 * 60 * 1000) { // 15 minutes
+                        syncToGoogleDrive();
+                    }
+                }
+            }, 30000); // Save every 30 seconds
+        }
+        
+        function hasUnsavedChanges() {
+            // Simple check - in a real app, you'd track dirty state
+            return pages.length > 0;
+        }
+        
+        function updateSyncStatus(message) {
+            document.getElementById('syncStatus').textContent = message;
+        }
+        
+        // Modal functions
+        function showConfirmModal(message, action) {
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmModal').style.display = 'block';
+            pendingConfirmAction = action;
+        }
+        
+        function closeModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            pendingConfirmAction = null;
+        }
+        
+        function confirmAction() {
+            if (pendingConfirmAction) {
+                pendingConfirmAction();
+            }
+            closeModal();
+        }
+        
+        // Enhanced page management with confirmation
+        function addNewPage() {
+            const newPage = {
+                rows: [],
+                partyName: document.getElementById('partyName').textContent || '',
+                date: currentDate
+            };
+            
+            for (let i = 1; i <= ROWS_PER_PAGE; i++) {
+                newPage.rows.push({
+                    fishName: '',
+                    maundRate: '',
+                    kg: '',
+                    wholesalerName: '',
+                    calculatedRate: 0,
+                    calculatedAmount: 0,
+                    calculatedWholesaleTotal: 0,
+                    isSummaryRow: false
+                });
+            }
+            
+            pages.push(newPage);
+            currentPageIndex = pages.length - 1;
+            updatePageTabs();
+            renderPage(currentPageIndex);
+            updateAllWholesalers();
+            updateWholesalerSummary();
+            saveToLocalStorage();
+        }
+        
+        // Rest of the original JavaScript functions (keeping the core functionality)
+        function updatePageTabs() {
+            const pageTabs = document.getElementById('pageTabs');
+            pageTabs.innerHTML = '';
+            
+            pages.forEach((page, index) => {
+                const tab = document.createElement('div');
+                tab.className = `page-tab ${index === currentPageIndex ? 'active' : ''}`;
+                tab.textContent = `পেজ ${index + 1}`;
+                tab.onclick = () => {
+                    currentPageIndex = index;
+                    renderPage(currentPageIndex);
+                    updatePageTabs();
+                };
+                pageTabs.appendChild(tab);
+            });
+        }
+        
+        function renderPage(pageIndex) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            
+            const page = pages[pageIndex];
+            document.getElementById('currentPage').textContent = pageIndex + 1;
+            
+            page.rows.forEach((rowData, i) => {
+                const row = document.createElement('tr');
+                const rowNumber = (pageIndex * ROWS_PER_PAGE) + i + 1;
+                
+                if (pageIndex === 0 && i >= WHOLESALER_SUMMARY_START_ROW && rowData.isSummaryRow) {
+                    row.className = 'wholesaler-summary-row';
+                    row.innerHTML = `
+                        <td>${rowNumber}</td>
+                        <td colspan="4">${rowData.fishName || 'পাইকারি সারাংশ'}</td>
+                        <td>${formatNumber(rowData.calculatedAmount)}</td>
+                        <td>${rowData.wholesalerName || ''}</td>
+                        <td>${formatNumber(rowData.calculatedWholesaleTotal)}</td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td>${rowNumber}</td>
+                        <td><input type="text" class="input-cell fish-name" value="${rowData.fishName || ''}"></td>
+                        <td><input type="number" class="input-cell maund-rate" value="${rowData.maundRate || ''}" min="0" max="999999" placeholder=""></td>
+                        <td class="rate ${rowData.calculatedRate ? '' : 'empty-cell'}">${rowData.calculatedRate ? formatNumber(rowData.calculatedRate) : ''}</td>
+                        <td><input type="number" class="input-cell kg" value="${rowData.kg || ''}" step="0.01" placeholder=""></td>
+                        <td class="amount ${rowData.calculatedAmount ? '' : 'empty-cell'}">${rowData.calculatedAmount ? formatNumber(rowData.calculatedAmount) : ''}</td>
+                        <td><input type="text" class="input-cell wholesaler-name" value="${rowData.wholesalerName || ''}" data-serial="${rowNumber}" placeholder=""></td>
+                        <td class="wholesale-total ${rowData.calculatedWholesaleTotal ? '' : 'empty-cell'}">${rowData.calculatedWholesaleTotal ? formatNumber(rowData.calculatedWholesaleTotal) : ''}</td>
+                    `;
+                }
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('.maund-rate, .kg').forEach(input => {
+                if (!input.closest('tr').classList.contains('wholesaler-summary-row')) {
+                    input.addEventListener('input', function() {
+                        calculateRow(this.closest('tr'));
+                        savePageData();
+                        updateAllWholesalers();
+                        updatePageTotals();
+                        updateWholesalerSummary();
+                        saveToLocalStorage();
+                    });
+                }
+            });
+            
+            document.querySelectorAll('.wholesaler-name').forEach(input => {
+                if (!input.closest('tr').classList.contains('wholesaler-summary-row')) {
+                    input.addEventListener('input', function() {
+                        savePageData();
+                        updateAllWholesalers();
+                        updatePageTotals();
+                        updateWholesalerSummary();
+                        saveToLocalStorage();
+                    });
+                }
+            });
+            
+            document.querySelectorAll('.fish-name').forEach(input => {
+                if (!input.closest('tr').classList.contains('wholesaler-summary-row')) {
+                    input.addEventListener('input', function() {
+                        checkForTotalRow(this.closest('tr'));
+                        savePageData();
+                        updateAllWholesalers();
+                        updatePageTotals();
+                        updateWholesalerSummary();
+                        saveToLocalStorage();
+                    });
+                }
+            });
+            
+            updatePageTotals();
+        }
+        
+        // Keep all the original calculation and utility functions
+        function calculateRow(row) {
+            const maundRateInput = row.querySelector('.maund-rate');
+            const kgInput = row.querySelector('.kg');
+            const rateCell = row.querySelector('.rate');
+            const amountCell = row.querySelector('.amount');
+            const wholesaleTotalCell = row.querySelector('.wholesale-total');
+            
+            const maundRate = parseFloat(maundRateInput.value) || 0;
+            const kg = parseFloat(kgInput.value) || 0;
+            
+            let rate = 0;
+            let amount = 0;
+            let wholesaleTotal = 0;
+            
+            if (maundRate > 0) {
+                rate = maundRate / 40;
+                amount = rate * kg;
+                wholesaleTotal = amount * WHOLESALER_RATE;
+            }
+            
+            rateCell.textContent = rate > 0 ? formatNumber(rate) : '';
+            rateCell.className = rate > 0 ? 'rate' : 'rate empty-cell';
+            
+            amountCell.textContent = amount > 0 ? formatNumber(amount) : '';
+            amountCell.className = amount > 0 ? 'amount' : 'amount empty-cell';
+            
+            wholesaleTotalCell.textContent = wholesaleTotal > 0 ? formatNumber(wholesaleTotal) : '';
+            wholesaleTotalCell.className = wholesaleTotal > 0 ? 'wholesale-total' : 'wholesale-total empty-cell';
+        }
+        
+        function formatNumber(num) {
+            if (num === 0) return '';
+            return parseFloat(num.toFixed(2)).toString();
+        }
+        
+        function savePageData() {
+            const page = pages[currentPageIndex];
+            const rows = document.querySelectorAll('#tableBody tr');
+            
+            rows.forEach((row, index) => {
+                if (!row.classList.contains('wholesaler-summary-row')) {
+                    const fishNameInput = row.querySelector('.fish-name');
+                    const maundRateInput = row.querySelector('.maund-rate');
+                    const kgInput = row.querySelector('.kg');
+                    const wholesalerNameInput = row.querySelector('.wholesaler-name');
+                    const rateCell = row.querySelector('.rate');
+                    const amountCell = row.querySelector('.amount');
+                    const wholesaleTotalCell = row.querySelector('.wholesale-total');
+                    
+                    if (fishNameInput && maundRateInput && kgInput && wholesalerNameInput) {
+                        page.rows[index] = {
+                            fishName: fishNameInput.value,
+                            maundRate: maundRateInput.value,
+                            kg: kgInput.value,
+                            wholesalerName: wholesalerNameInput.value,
+                            calculatedRate: parseFloat(rateCell.textContent) || 0,
+                            calculatedAmount: parseFloat(amountCell.textContent) || 0,
+                            calculatedWholesaleTotal: parseFloat(wholesaleTotalCell.textContent) || 0,
+                            isSummaryRow: false
+                        };
+                    }
+                }
+            });
+        }
+        
+        function updateAllWholesalers() {
+            allWholesalers = {};
+            
+            pages.forEach(page => {
+                page.rows.forEach(row => {
+                    if (row.wholesalerName && row.calculatedAmount > 0) {
+                        if (!allWholesalers[row.wholesalerName]) {
+                            allWholesalers[row.wholesalerName] = {
+                                totalAmount: 0,
+                                totalKg: 0
+                            };
+                        }
+                        allWholesalers[row.wholesalerName].totalAmount += row.calculatedAmount;
+                        allWholesalers[row.wholesalerName].totalKg += parseFloat(row.kg) || 0;
+                    }
+                });
+            });
+        }
+        
+        function updateWholesalerSummary() {
+            if (pages.length === 0) return;
+            
+            const firstPage = pages[0];
+            const wholesalersList = Object.keys(allWholesalers).filter(name => name && allWholesalers[name].totalAmount > 0);
+            
+            for (let i = WHOLESALER_SUMMARY_START_ROW; i < ROWS_PER_PAGE; i++) {
+                firstPage.rows[i] = {
+                    fishName: '',
+                    maundRate: '',
+                    kg: '',
+                    wholesalerName: '',
+                    calculatedRate: 0,
+                    calculatedAmount: 0,
+                    calculatedWholesaleTotal: 0,
+                    isSummaryRow: false
+                };
+            }
+            
+            wholesalersList.forEach((name, index) => {
+                const rowIndex = WHOLESALER_SUMMARY_START_ROW + index;
+                if (rowIndex >= ROWS_PER_PAGE) return;
+                
+                const wholesalerData = allWholesalers[name];
+                const wholesaleTotal = wholesalerData.totalAmount * WHOLESALER_RATE;
+                
+                firstPage.rows[rowIndex] = {
+                    fishName: 'পাইকারি সারাংশ',
+                    maundRate: '',
+                    kg: '',
+                    wholesalerName: name,
+                    calculatedRate: 0,
+                    calculatedAmount: wholesalerData.totalAmount,
+                    calculatedWholesaleTotal: wholesaleTotal,
+                    isSummaryRow: true
+                };
+            });
+            
+            if (currentPageIndex === 0) {
+                renderPage(0);
+            }
+        }
+        
+        function updatePageTotals() {
+            let pageTotalKg = 0;
+            let pageTotalAmount = 0;
+            let pageTotalWholesale = 0;
+            
+            let grandTotalKg = 0;
+            let grandTotalAmount = 0;
+            let grandTotalWholesale = 0;
+            
+            const currentPage = pages[currentPageIndex];
+            if (currentPage) {
+                currentPage.rows.forEach(row => {
+                    if (!row.isSummaryRow) {
+                        pageTotalKg += parseFloat(row.kg) || 0;
+                        pageTotalAmount += row.calculatedAmount || 0;
+                        pageTotalWholesale += row.calculatedWholesaleTotal || 0;
+                    }
+                });
+            }
+            
+            pages.forEach(page => {
+                page.rows.forEach(row => {
+                    if (!row.isSummaryRow) {
+                        grandTotalKg += parseFloat(row.kg) || 0;
+                        grandTotalAmount += row.calculatedAmount || 0;
+                        grandTotalWholesale += row.calculatedWholesaleTotal || 0;
+                    }
+                });
+            });
+            
+            document.getElementById('totalKg').textContent = formatNumber(pageTotalKg);
+            document.getElementById('sumTk').textContent = formatNumber(pageTotalAmount);
+            document.getElementById('totalWholesale').textContent = formatNumber(pageTotalWholesale);
+            document.getElementById('totalTk').textContent = formatNumber(pageTotalAmount);
+            
+            document.getElementById('grandTotalKg').textContent = formatNumber(grandTotalKg);
+            document.getElementById('grandSumTk').textContent = formatNumber(grandTotalAmount);
+            document.getElementById('grandTotalWholesale').textContent = formatNumber(grandTotalWholesale);
+        }
+        
+        function checkForTotalRow(row) {
+            const fishNameInput = row.querySelector('.fish-name');
+            if (fishNameInput && fishNameInput.value.toLowerCase().includes('মোট')) {
+                row.classList.add('total-row-highlight');
+            } else {
+                row.classList.remove('total-row-highlight');
+            }
+        }
+        
+        function prevPage() {
+            if (currentPageIndex > 0) {
+                savePageData();
+                currentPageIndex--;
+                renderPage(currentPageIndex);
+                updatePageTabs();
+            }
+        }
+        
+        function nextPage() {
+            if (currentPageIndex < pages.length - 1) {
+                savePageData();
+                currentPageIndex++;
+                renderPage(currentPageIndex);
+                updatePageTabs();
+            }
+        }
+        
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 10, 200);
+            document.getElementById('tableContainer').style.zoom = currentZoom + '%';
+        }
+        
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 10, 50);
+            document.getElementById('tableContainer').style.zoom = currentZoom + '%';
+        }
+    </script>
+</body>
+</html>
+
