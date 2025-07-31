@@ -242,12 +242,14 @@
     <div class="page-tabs" id="pageTabs"></div>
 
     <div class="page-controls">
-        <button class="page-btn" onclick="addNewPage()">নতুন পেজ (+)</button>
-        <div class="page-info">পেজ: <span id="currentPage">1</span></div>
-        <div>
-            <button class="page-btn" onclick="prevPage()">পূর্ববর্তী</button>
-            <button class="page-btn" onclick="nextPage()">পরবর্তী</button>
-        </div>
+    <button class="page-btn" onclick="addNewPage()">নতুন পেজ (+)</button>
+    <div class="page-info">পেজ: <span id="currentPage">1</span></div>
+    <div>
+        <button class="page-btn" onclick="prevPage()">পূর্ববর্তী</button>
+        <button class="page-btn" onclick="nextPage()">পরবর্তী</button>
+        <button class="page-btn" onclick="confirmDeleteCurrentPage()" style="background-color: #f44336;">পেজ ডিলেট</button>
+        <button class="page-btn" onclick="confirmResetAllData()" style="background-color: #ff9800;">সব ডাটা রিসেট</button>
+    </div>
     </div>
 
     <div class="zoom-controls">
@@ -644,7 +646,74 @@
             if (value === 0 || isNaN(value) || value === '') return '';
             return parseFloat(value).toFixed(2);
         }
-        
+
+        // বর্তমান পেজ ডিলেট করার কনফার্মেশন
+function confirmDeleteCurrentPage() {
+    if (pages.length <= 1) {
+        showConfirmation('অন্তত একটি পেজ থাকা আবশ্যক!');
+        return;
+    }
+
+    if (confirm('আপনি কি নিশ্চিত যে আপনি বর্তমান পেজ ডিলেট করতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না!')) {
+        deleteCurrentPage();
+    }
+}
+
+// বর্তমান পেজ ডিলেট করুন
+function deleteCurrentPage() {
+    pages.splice(currentPageIndex, 1);
+    
+    // যদি শেষ পেজ ডিলেট করা হয়, তাহলে পূর্ববর্তী পেজে যান
+    if (currentPageIndex >= pages.length) {
+        currentPageIndex = pages.length - 1;
+    }
+    
+    renderPage(currentPageIndex);
+    updatePageTabs();
+    updateAllWholesalers();
+    updateWholesalerSummary();
+    backupData();
+    
+    showConfirmation('পেজ সফলভাবে ডিলেট করা হয়েছে!');
+}
+
+// সব ডাটা রিসেট করার কনফার্মেশন
+function confirmResetAllData() {
+    if (confirm('আপনি কি নিশ্চিত যে আপনি সব ডাটা রিসেট করতে চান?\n\nএই কাজটি পূর্বাবস্থায় ফেরানো যাবে না!\nসমস্ত পেজ এবং তথ্য মুছে ফেলা হবে!')) {
+        resetAllData();
+    }
+}
+
+// সব ডাটা রিসেট করুন
+function resetAllData() {
+    // লোকাল স্টোরেজ এবং ইন্ডেক্সড ডিবি থেকে ডাটা মুছুন
+    localStorage.removeItem(STORAGE_KEY);
+    
+    if ('indexedDB' in window) {
+        const request = indexedDB.deleteDatabase('FishCalculatorDB');
+        request.onsuccess = function() {
+            console.log('Database successfully deleted');
+        };
+        request.onerror = function() {
+            console.log('Error deleting database');
+        };
+    }
+    
+    // নতুন ডাটা দিয়ে ইনিশিয়ালাইজ করুন
+    pages = [];
+    allWholesalers = {};
+    currentPageIndex = 0;
+    
+    document.getElementById('partyName').textContent = '';
+    
+    const today = new Date();
+    currentDate = today.getDate() + '/' + (today.getMonth()+1) + '/' + today.getFullYear();
+    document.getElementById('dateField').textContent = currentDate;
+    
+    addNewPage();
+    
+    showConfirmation('সব ডাটা সফলভাবে রিসেট করা হয়েছে!');
+     }
         // সারি ক্যালকুলেশন করুন
         function calculateRow(row) {
             if (row.classList.contains('wholesaler-summary-row')) return;
