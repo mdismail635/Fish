@@ -8,111 +8,248 @@
     <link rel="manifest" href="manifest.json">
     <style>
         
-            /*মোবাইল ডিসপ্লে অপ্টিমাইজেশন */
+        /* মোবাইল ডিসপ্লে অপ্টিমাইজেশন - কালার ও স্টাইল আপডেট */
 @media (max-width: 768px) {
     body {
         padding: 3px;
         font-size: 14px;
         overflow-x: hidden;
-    }
-    
-    .table-container {
-        width: 100vw;
-        margin-left: -5px;
-        margin-right: -5px;
-    }
-    
-    table {
-        min-width: 800px; /* টেবিলের মিনিমাম প্রস্থ */
-        overflow-x: auto;
+        background-color: #f8f9fa;
     }
     
     .header {
         flex-direction: column;
         gap: 5px;
         font-size: 14px;
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .underline {
+        border-bottom: 2px solid white;
+        color: white;
+        padding-bottom: 2px;
+    }
+    
+    .table-container {
+        width: 100vw;
+        margin-left: -5px;
+        margin-right: -5px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    table {
+        min-width: 800px;
+        overflow-x: auto;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    th {
+        background-color: #2E7D32;
+        color: white;
+        position: sticky;
+        top: 0;
+        font-weight: 600;
+        padding: 8px 3px;
+    }
+    
+    td {
+        background-color: white;
+    }
+    
+    tr:nth-child(even) td {
+        background-color: #f1f8e9;
     }
     
     .page-controls, .backup-controls {
         flex-direction: column;
         align-items: center;
         gap: 5px;
+        background-color: #e8f5e9;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 10px 0;
     }
     
     .page-btn, .backup-btn, .zoom-btn {
-        padding: 6px 8px;
+        padding: 8px 12px;
         font-size: 12px;
         width: 100%;
-        max-width: 150px;
+        max-width: 180px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    
+    .page-btn {
+        background-color: #4CAF50;
+    }
+    
+    .backup-btn {
+        background-color: #2196F3;
+    }
+    
+    .zoom-btn {
+        background-color: #FF9800;
+    }
+    
+    .page-btn:hover, .backup-btn:hover, .zoom-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
     }
     
     .page-tabs {
         justify-content: center;
         overflow-x: auto;
         padding-bottom: 5px;
+        background-color: #e8f5e9;
+        padding: 8px;
+        border-radius: 8px;
     }
     
     .page-tab {
-        padding: 3px 6px;
+        padding: 5px 10px;
         font-size: 12px;
+        background-color: #c8e6c9;
+        color: #2E7D32;
     }
     
-    th, td {
-        padding: 4px 2px;
-        font-size: 11px;
+    .page-tab.active {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
     }
     
     /* কলাম প্রস্থ সামঞ্জস্য */
-    .serial { width: 25px; }
-    .fish-name { width: 60px; }
-    .maund-rate { width: 60px; }
-    .rate { width: 40px; }
-    .kg { width: 40px; }
-    .amount { width: 60px; }
-    .wholesaler { width: 80px; }
-    .wholesale-total { width: 70px; }
+    .serial { width: 30px; }
+    .fish-name { width: 70px; }
+    .maund-rate { width: 70px; }
+    .rate { width: 50px; }
+    .kg { width: 50px; }
+    .amount { width: 70px; }
+    .wholesaler { width: 90px; }
+    .wholesale-total { width: 80px; }
     
-    /* ইনপুট ফিল্ড সামঞ্জস্য */
+    /* ইনপুট ফিল্ড স্টাইল */
     .input-cell {
-        padding: 2px;
-        font-size: 11px;
+        padding: 5px;
+        font-size: 12px;
+        border: 1px solid #bdbdbd;
+        border-radius: 4px;
+        background-color: white;
+    }
+    
+    .input-cell:focus {
+        border-color: #4CAF50;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
     }
     
     /* জুম কন্ট্রোল */
     .zoom-controls {
         position: fixed;
-        bottom: 10px;
-        right: 10px;
+        bottom: 20px;
+        right: 15px;
         z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
     
     .zoom-btn {
-        width: auto;
-        padding: 8px;
+        width: 50px;
+        height: 50px;
+        padding: 0;
         border-radius: 50%;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* টোটাল রো স্টাইল */
+    .total-row {
+        background-color: #bbdefb !important;
+        color: #0d47a1;
+    }
+    
+    .sum-cell {
+        background-color: #ffecb3;
+        color: #ff6f00;
+        font-weight: bold;
+    }
+    
+    .wholesaler-summary-row {
+        background-color: #e8f5e9 !important;
+        color: #2E7D32;
+    }
+    
+    .first-occurrence {
+        background-color: #fffde7;
+    }
+    
+    .confirmation {
+        background-color: #4CAF50;
+        font-weight: bold;
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .install-btn {
+        background-color: #FF9800;
+        font-weight: bold;
     }
 }
 
-/* অতিরিক্ত ছোট ডিভাইসের জন্য (320px পর্যন্ত) */
+/* অতিরিক্ত ছোট ডিভাইসের জন্য (320px-480px) */
+@media (max-width: 480px) {
+    body {
+        font-size: 13px;
+    }
+    
+    th, td {
+        padding: 5px 2px;
+    }
+    
+    .page-btn, .backup-btn {
+        max-width: 160px;
+        padding: 7px 10px;
+    }
+    
+    .input-cell {
+        padding: 4px;
+        font-size: 11px;
+    }
+    
+    .zoom-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+}
+
+/* সবচেয়ে ছোট ডিভাইসের জন্য (320px পর্যন্ত) */
 @media (max-width: 320px) {
     body {
         font-size: 12px;
     }
     
-    th, td {
-        padding: 2px 1px;
-        font-size: 10px;
+    .page-btn, .backup-btn {
+        max-width: 140px;
+        padding: 6px 8px;
+        font-size: 11px;
     }
     
     .input-cell {
         font-size: 10px;
     }
-    
-    .page-btn, .backup-btn {
-        max-width: 120px;
-    }
-    } 
+}    
+
         
     </style>
 </head>
