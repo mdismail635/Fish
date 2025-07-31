@@ -7,114 +7,98 @@
     <meta name="theme-color" content="#4CAF50">
     <link rel="manifest" href="manifest.json">
     <style>
-
-        /* এক্সেল-স্টাইল রো গ্যাপ সহ পূর্বের রং স্কিম */
+    /* টেবিল স্টাইল - স্ক্রিনশটের মতো */
 @media (max-width: 768px) {
-    /* টেবিল স্টাইল */
+    /* টেবিল বেসিক স্টাইল */
     table {
-        border-collapse: separate;
-        border-spacing: 0 2px; /* রোগুলির মধ্যে 3px গ্যাপ */
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 100%;
+        table-layout: fixed;
     }
 
-    /* প্রতিটি ডাটা রো স্টাইল */
-    tr:not(:first-child) {
-        background-color: white;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
+    /* কলাম প্রস্থ সুনির্দিষ্টভাবে সেট করুন */
+    .serial { width: 20px !important; }
+    .fish-name { width: 30px !important; }
+    .maund-rate { width: 70px !important; }
+    .rate { width: 40px !important; }
+    .kg { width: 40px !important; }
+    .wholesaler { width: 80px !important; }
+    .wholesale-total { width: 80px !important; }
 
-    /* সেল বর্ডার স্টাইল */
-    td {
-        border-top: 1px solid #e0e0e0;
-        border-bottom: 1px solid #e0e0e0;
-        padding: 2px 2px;
-        background-color: inherit; /* পূর্বের ব্যাকগ্রাউন্ড কালার রাখা */
-    }
-
-    td:first-child {
-        border-left: 1px solid #e0e0e0;
-    }
-
-    td:last-child {
-        border-right: 1px solid #e0e0e0;
-    }
-
-    /* হেডার স্টাইল (পূর্বের মতো) */
+    /* হেডার স্টাইল */
     th {
-        background-color: #4CAF50 !important;
-        color: white !important;
-        border: none !important;
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        padding: 8px 3px;
+        text-align: center;
+        border: 1px solid #2E7D32;
+    }
+
+    /* ডাটা সেল স্টাইল */
+    td {
         padding: 6px 3px;
-        position: sticky;
-        top: 0;
+        text-align: center;
+        border: 1px solid #e0e0e0;
+        font-size: 12px;
     }
 
-    /* জোড় সারির কালার (পূর্বের মতো) */
-    tr:nth-child(even) td {
-        background-color: #f2f2f2 !important;
-    }
-
-    /* টোটাল রো স্টাইল (পূর্বের মতো) */
-    .total-row td {
-        background-color: #e6f7ff !important;
-        font-weight: bold;
-    }
-
-    /* সাম সেল স্টাইল (পূর্বের মতো) */
-    .sum-cell {
-        background-color: #fffacd !important;
-        font-weight: bold;
-    }
-
-    /* পাইকারি সারাংশ রো স্টাইল (পূর্বের মতো) */
-    .wholesaler-summary-row td {
-        background-color: #f0fff0 !important;
-    }
-
-    /* প্রথম অকারেন্স স্টাইল (পূর্বের মতো) */
-    .first-occurrence td {
-        background-color: #ffffcc !important;
-    }
-
-    /* টোটাল হাইলাইট রো স্টাইল (পূর্বের মতো) */
-    .total-row-highlight td {
-        background-color: #ffeb99 !important;
-        font-weight: bold;
-    }
-
-    /* কলাম প্রস্থ সামঞ্জস্য */
-    .serial { width: 30px; }
-    .fish-name { width: 60px; }
-    .maund-rate { width: 80px; }
-    .rate { width: 40px; }
-    .kg { width: 40px; }
-    .amount { width: 70px; }
-    .wholesaler { width: 70px; }
-    .wholesale-total { width: 70px; }
-
-    /* ইনপুট ফিল্ড স্টাইল (পূর্বের মতো) */
+    /* ইনপুট ফিল্ড স্টাইল */
     .input-cell {
         width: 100%;
         padding: 3px;
-        text-align: center;
-        border: 1px solid #ccc;
+        border: 1px solid #bdbdbd;
         border-radius: 2px;
+        text-align: center;
         box-sizing: border-box;
         font-size: 12px;
+    }
+
+    /* জোড় সারির কালার */
+    tr:nth-child(even) {
+        background-color: #f5f5f5;
+    }
+
+    /* বিশেষ সারির স্টাইল */
+    .total-row td {
+        background-color: #e6f7ff;
+        font-weight: bold;
+    }
+
+    .sum-cell {
+        background-color: #fffacd;
+        font-weight: bold;
+    }
+
+    .wholesaler-summary-row td {
+        background-color: #f0fff0;
+    }
+
+    /* স্ক্রলেবল টেবিল কন্টেইনার */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid #ddd;
         background-color: white;
+        box-shadow: none;
+        margin-bottom: 10px;
     }
 }
 
-/* ছোট ডিভাইসের জন্য অতিরিক্ত স্টাইল */
+/* ছোট ডিভাইসের জন্য অতিরিক্ত অপ্টিমাইজেশন */
 @media (max-width: 480px) {
     td, th {
-        padding: 1px 2px !important;
+        padding: 4px 2px !important;
+        font-size: 11px !important;
     }
     
     .input-cell {
         padding: 2px !important;
         font-size: 11px !important;
-    }
-}
+     }
+   }
+        
     </style>
 </head>
 <body>
