@@ -7,107 +7,114 @@
     <meta name="theme-color" content="#4CAF50">
     <link rel="manifest" href="manifest.json">
     <style>
-       /* Excel-like gap between rows with existing color scheme */
+
+        /* এক্সেল-স্টাইল রো গ্যাপ সহ পূর্বের রং স্কিম */
 @media (max-width: 768px) {
-    /* Add gap between rows */
+    /* টেবিল স্টাইল */
     table {
         border-collapse: separate;
-        border-spacing: 0 3px; /* Vertical gap between rows */
+        border-spacing: 0 3px; /* রোগুলির মধ্যে 3px গ্যাপ */
     }
-    
-    /* Style for each data row */
+
+    /* প্রতিটি ডাটা রো স্টাইল */
     tr:not(:first-child) {
-        margin-bottom: 3px; /* Gap between rows */
         background-color: white;
-        border-radius: 4px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
-    
-    /* Cell styling for the gap effect */
+
+    /* সেল বর্ডার স্টাইল */
     td {
         border-top: 1px solid #e0e0e0;
         border-bottom: 1px solid #e0e0e0;
-        padding: 6px 3px;
+        padding: 5px 3px;
+        background-color: inherit; /* পূর্বের ব্যাকগ্রাউন্ড কালার রাখা */
     }
-    
-    /* First cell in each row */
+
     td:first-child {
         border-left: 1px solid #e0e0e0;
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
     }
-    
-    /* Last cell in each row */
+
     td:last-child {
         border-right: 1px solid #e0e0e0;
-        border-top-right-radius: 4px;
-        border-bottom-right-radius: 4px;
     }
-    
-    /* Header row styling */
+
+    /* হেডার স্টাইল (পূর্বের মতো) */
     th {
+        background-color: #4CAF50 !important;
+        color: white !important;
         border: none !important;
         padding: 8px 3px;
+        position: sticky;
+        top: 0;
     }
-    
-    /* Even row coloring */
+
+    /* জোড় সারির কালার (পূর্বের মতো) */
     tr:nth-child(even) td {
-        background-color: #f5f5f5;
+        background-color: #f2f2f2 !important;
     }
-    
-    /* Adjust column widths to prevent wholesaler columns from breaking */
-    .serial { width: 40px !important; }
-    .fish-name { width: 80px !important; }
-    .maund-rate { width: 80px !important; }
-    .rate { width: 60px !important; }
-    .kg { width: 60px !important; }
-    .amount { width: 80px !important; }
-    .wholesaler { width: 100px !important; }
-    .wholesale-total { width: 90px !important; }
-    
-    /* Input field styling */
-    .input-cell {
-        border: 1px solid #bdbdbd;
-        background-color: white;
-        border-radius: 3px;
-        padding: 4px;
-    }
-    
-    /* Keep existing color scheme */
+
+    /* টোটাল রো স্টাইল (পূর্বের মতো) */
     .total-row td {
-        background-color: #bbdefb !important;
-        color: #0d47a1;
+        background-color: #e6f7ff !important;
         font-weight: bold;
     }
-    
+
+    /* সাম সেল স্টাইল (পূর্বের মতো) */
     .sum-cell {
-        background-color: #ffecb3 !important;
-        color: #ff6f00;
+        background-color: #fffacd !important;
+        font-weight: bold;
     }
-    
+
+    /* পাইকারি সারাংশ রো স্টাইল (পূর্বের মতো) */
     .wholesaler-summary-row td {
-        background-color: #e8f5e9 !important;
-        color: #2E7D32;
+        background-color: #f0fff0 !important;
     }
-    
+
+    /* প্রথম অকারেন্স স্টাইল (পূর্বের মতো) */
     .first-occurrence td {
-        background-color: #fffde7 !important;
+        background-color: #ffffcc !important;
+    }
+
+    /* টোটাল হাইলাইট রো স্টাইল (পূর্বের মতো) */
+    .total-row-highlight td {
+        background-color: #ffeb99 !important;
+        font-weight: bold;
+    }
+
+    /* কলাম প্রস্থ সামঞ্জস্য */
+    .serial { width: 30px; }
+    .fish-name { width: 60px; }
+    .maund-rate { width: 70px; }
+    .rate { width: 50px; }
+    .kg { width: 50px; }
+    .amount { width: 70px; }
+    .wholesaler { width: 90px; }
+    .wholesale-total { width: 80px; }
+
+    /* ইনপুট ফিল্ড স্টাইল (পূর্বের মতো) */
+    .input-cell {
+        width: 100%;
+        padding: 3px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 2px;
+        box-sizing: border-box;
+        font-size: 12px;
+        background-color: white;
     }
 }
 
-/* Fix for very small screens */
+/* ছোট ডিভাইসের জন্য অতিরিক্ত স্টাইল */
 @media (max-width: 480px) {
     td, th {
         padding: 4px 2px !important;
     }
     
     .input-cell {
-        padding: 3px !important;
+        padding: 2px !important;
         font-size: 11px !important;
-     }
-  } 
-   
+    }
+}
     </style>
 </head>
 <body>
