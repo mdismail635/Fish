@@ -7,226 +7,113 @@
     <meta name="theme-color" content="#4CAF50">
     <link rel="manifest" href="manifest.json">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 5px;
-            background-color: #f5f5f5;
-            font-size: 13px;
-            touch-action: manipulation;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 16px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .underline {
-            border-bottom: 1px solid #000;
-            margin: 3px 0;
-            display: inline-block;
-            min-width: 100px;
-            padding-bottom: 2px;
-        }
-        .zoom-controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 5px 0;
-        }
-        .zoom-btn {
-            padding: 5px 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border: 1px solid #ddd;
-            background-color: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 5px 3px;
-            text-align: center;
-            word-wrap: break-word;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            font-size: 12px;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .input-cell {
-            width: 100%;
-            padding: 3px;
-            text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 2px;
-            box-sizing: border-box;
-            font-size: 12px;
-        }
-        .total-row {
-            font-weight: bold;
-            background-color: #e6f7ff;
-        }
-        .serial {
-            width: 30px;
-        }
-        .fish-name {
-            width: 40px;
-        }
-        .maund-rate {
-            width: 80px;
-        }
-        .rate {
-            width: 40px;
-        }
-        .kg {
-            width: 40px;
-        }
-        .amount {
-            width: 70px;
-            min-width: 70px;
-        }
-        .wholesaler {
-            width: 90px;
-        }
-        .wholesale-total {
-            width: 80px;
-            font-weight: bold;
-        }
-        .sum-cell {
-            background-color: #fffacd;
-            font-weight: bold;
-        }
-        .first-occurrence {
-            background-color: #ffffcc;
-        }
-        .total-row-highlight {
-            background-color: #ffeb99;
-            font-weight: bold;
-        }
-        .empty-cell {
-            color: transparent;
-        }
-        .page-controls {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .page-btn {
-            padding: 5px 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .page-info {
-            font-weight: bold;
-            padding: 5px 10px;
-        }
-        .page-tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        .page-tab {
-            padding: 5px 10px;
-            background-color: #ddd;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .page-tab.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .wholesaler-summary-row {
-            background-color: #f0fff0;
-        }
-        .backup-controls {
-            display: flex;
-            justify-content: space-around;
-            margin: 10px 0;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .backup-btn {
-            padding: 5px 10px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .confirmation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            z-index: 1000;
-            display: none;
-        }
-        .install-btn {
-            padding: 5px 10px;
-            background-color: #FF9800;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            margin: 5px 0;
-            display: none;
-        }
-        @media (max-width: 400px) {
-            th, td {
-                padding: 4px 2px;
-                font-size: 11px;
-            }
-            .fish-name {
-                width: 60px;
-            }
-            .maund-rate {
-                width: 70px;
-            }
-            .rate, .kg {
-                width: 40px;
-            }
-            .amount {
-                width: 50px;
-            }
-            .wholesaler {
-                width: 70px;
-            }
-            .wholesale-total {
-                width: 60px;
-            }
-        }
+        
+            /* মোবাইল ডিসপ্লে অপ্টিমাইজেশন */
+@media (max-width: 768px) {
+    body {
+        padding: 3px;
+        font-size: 14px;
+        overflow-x: hidden;
+    }
+    
+    .table-container {
+        width: 100vw;
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+    
+    table {
+        min-width: 800px; /* টেবিলের মিনিমাম প্রস্থ */
+        overflow-x: auto;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 5px;
+        font-size: 14px;
+    }
+    
+    .page-controls, .backup-controls {
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .page-btn, .backup-btn, .zoom-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+        width: 100%;
+        max-width: 150px;
+    }
+    
+    .page-tabs {
+        justify-content: center;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+    
+    .page-tab {
+        padding: 3px 6px;
+        font-size: 12px;
+    }
+    
+    th, td {
+        padding: 4px 2px;
+        font-size: 11px;
+    }
+    
+    /* কলাম প্রস্থ সামঞ্জস্য */
+    .serial { width: 25px; }
+    .fish-name { width: 60px; }
+    .maund-rate { width: 60px; }
+    .rate { width: 40px; }
+    .kg { width: 40px; }
+    .amount { width: 60px; }
+    .wholesaler { width: 80px; }
+    .wholesale-total { width: 70px; }
+    
+    /* ইনপুট ফিল্ড সামঞ্জস্য */
+    .input-cell {
+        padding: 2px;
+        font-size: 11px;
+    }
+    
+    /* জুম কন্ট্রোল */
+    .zoom-controls {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 100;
+    }
+    
+    .zoom-btn {
+        width: auto;
+        padding: 8px;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+}
+
+/* অতিরিক্ত ছোট ডিভাইসের জন্য (320px পর্যন্ত) */
+@media (max-width: 320px) {
+    body {
+        font-size: 12px;
+    }
+    
+    th, td {
+        padding: 2px 1px;
+        font-size: 10px;
+    }
+    
+    .input-cell {
+        font-size: 10px;
+    }
+    
+    .page-btn, .backup-btn {
+        max-width: 120px;
+    }
+}
+        
     </style>
 </head>
 <body>
