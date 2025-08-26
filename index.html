@@ -1146,6 +1146,11 @@ function resetAllData() {
 
         function showKeypad(input){
             activeNumericInput = input;
+            // কার্সর সবসময় শেষে বসান যাতে select-all থেকে রিপ্লেস না হয়
+            try {
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+            } catch (_) {}
             const kb = document.querySelector('.num-keypad');
             if (kb) kb.style.display = 'block';
         }
