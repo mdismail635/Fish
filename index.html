@@ -412,9 +412,9 @@
                     row.innerHTML = `
                         <td>${rowNumber}</td>
                         <td><input type="text" class="input-cell fish-name" value="${rowData.fishName || ''}"></td>
-                        <td><input type="number" class="input-cell maund-rate" value="${rowData.maundRate || ''}" min="0" max="999999" placeholder=""></td>
+                        <td><input type="number" class="input-cell maund-rate" data-row="${i}" value="${rowData.maundRate || ''}" min="0" max="999999" placeholder=""></td>
                         <td class="rate ${rowData.calculatedRate ? '' : 'empty-cell'}">${rowData.calculatedRate ? formatNumber(rowData.calculatedRate) : ''}</td>
-                        <td><input type="number" class="input-cell kg" value="${rowData.kg || ''}" step="0.01" placeholder=""></td>
+                        <td><input type="number" class="input-cell kg" data-row="${i}" value="${rowData.kg || ''}" step="0.01" placeholder=""></td>
                         <td class="amount ${rowData.calculatedAmount ? '' : 'empty-cell'}">${rowData.calculatedAmount ? formatNumber(rowData.calculatedAmount) : ''}</td>
                         <td><input type="text" class="input-cell wholesaler-name" value="${rowData.wholesalerName || ''}" data-serial="${rowNumber}" placeholder=""></td>
                         <td class="wholesale-total ${rowData.calculatedWholesaleTotal ? '' : 'empty-cell'}">${rowData.calculatedWholesaleTotal ? formatNumber(rowData.calculatedWholesaleTotal) : ''}</td>
@@ -1252,6 +1252,10 @@ function resetAllData() {
         // মোবাইল কিবোর্ড বন্ধ করতে
         input.setAttribute('inputmode', 'none');
         input.setAttribute('readonly', 'readonly');
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('autocapitalize', 'off');
+        input.setAttribute('spellcheck', 'false');
 
         // ট্যাপ/ক্লিক ইন্টারসেপ্ট করে আমাদের কিবোর্ড দেখাই
         const openPad = (e) => {
