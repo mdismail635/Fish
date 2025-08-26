@@ -1164,17 +1164,21 @@ function resetAllData() {
 
         function insertToActiveInput(text){
             if (!activeNumericInput) return;
-            const start = activeNumericInput.selectionStart ?? activeNumericInput.value.length;
-            const end = activeNumericInput.selectionEnd ?? activeNumericInput.value.length;
+            let start = activeNumericInput.selectionStart ?? activeNumericInput.value.length;
+            let end = activeNumericInput.selectionEnd ?? activeNumericInput.value.length;
             const current = activeNumericInput.value;
             // ডট হ্যান্ডলিং: ফাঁকা বা শুধু '-' হলে '0.'/'-0.' বসান, এবং একটির বেশি ডট না
             if (text === '.') {
                 if (current.includes('.')) return;
+                // সিলেক্ট-অল থাকলে রিপ্লেস নয়, শেষে অ্যাপেন্ড
+                if (start !== end) {
+                    start = end = current.length;
+                }
                 if (current === '' || current === '-') {
                     const prefix = current === '-' ? '-0.' : '0.';
                     setActiveInputValue(prefix);
                     const caret0 = prefix.length;
-                    activeNumericInput.setSelectionRange(caret0, caret0);
+                    try { activeNumericInput.setSelectionRange(caret0, caret0); } catch (_) {}
                     return;
                 }
             }
@@ -1183,7 +1187,7 @@ function resetAllData() {
             if (text === '.' && (next.match(/\./g)?.length || 0) > 1) return;
             setActiveInputValue(next);
             const caret = start + text.length;
-            activeNumericInput.setSelectionRange(caret, caret);
+            try { activeNumericInput.setSelectionRange(caret, caret); } catch (_) {}
         }
 
         function backspaceActiveInput(){
