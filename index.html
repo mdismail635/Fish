@@ -1069,6 +1069,160 @@ function resetAllData() {
                 backupData();
             });
         });
+
+        // ===========================
+        // অন-স্ক্রিন ক্যালকুলেটর কিবোর্ড
+        // ===========================
+        let activeNumericInput = null;
+
+        // কিবোর্ড তৈরি করুন (একবার)
+        (function createNumericKeypad(){
+            const style = document.createElement('style');
+            style.textContent = `
+            .num-keypad{position:fixed;left:0;right:0;bottom:0;background:#ffffff;border-top:1px solid #ddd;display:none;z-index:9999}
+            .num-keypad .row{display:flex}
+            .num-keypad button{flex:1;padding:14px;font-size:18px;border:1px solid #eee;background:#fafafa}
+            .num-keypad button:active{background:#eaeaea}
+            .num-keypad .action{background:#f5f5f5}
+            .num-keypad .done{background:#4CAF50;color:#fff}
+            `;
+            document.head.appendChild(style);
+
+            const kb = document.createElement('div');
+            kb.className = 'num-keypad';
+            kb.innerHTML = `
+                <div class="row">
+                    <button data-val="7">7</button>
+                    <button data-val="8">8</button>
+                    <button data-val="9">9</button>
+                    <button class="action" data-action="back">⌫</button>
+                </div>
+                <div class="row">
+                    <button data-val="4">4</button>
+                    <button data-val="5">5</button>
+                    <button data-val="6">6</button>
+                    <button class="action" data-action="clear">C</button>
+                </div>
+                <div class="row">
+                    <button data-val="1">1</button>
+                    <button data-val="2">2</button>
+                    <button data-val="3">3</button>
+                    <button class="done" data-action="done">Done</button>
+                </div>
+                <div class="row">
+                    <button data-val="00">00</button>
+                    <button data-val="0">0</button>
+                    <button data-val=".">.</button>
+                    <button class="action" data-action="minus">±</button>
+                </div>
+            `;
+            document.body.appendChild(kb);
+
+            // ইন্টারেকশন
+            kb.addEventListener('mousedown', function(e){ e.preventDefault(); });
+            kb.addEventListener('click', function(e){
+                const target = e.target.closest('button');
+                if(!target || !activeNumericInput) return;
+
+                const val = target.getAttribute('data-val');
+                const action = target.getAttribute('data-action');
+
+                if (val !== null) {
+                    insertToActiveInput(val);
+                    return;
+                }
+
+                if (action === 'back') {
+                    backspaceActiveInput();
+                } else if (action === 'clear') {
+                    setActiveInputValue('');
+                } else if (action === 'done') {
+                    hideKeypad();
+                } else if (action === 'minus') {
+                    toggleSignActiveInput();
+                }
+            });
+        })();
+
+        function showKeypad(input){
+            activeNumericInput = input;
+            const kb = document.querySelector('.num-keypad');
+            if (kb) kb.style.display = 'block';
+        }
+
+        function hideKeypad(){
+            const kb = document.querySelector('.num-keypad');
+            if (kb) kb.style.display = 'none';
+            activeNumericInput = null;
+        }
+
+        function setActiveInputValue(newVal){
+            if (!activeNumericInput) return;
+            activeNumericInput.value = newVal;
+            activeNumericInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        function insertToActiveInput(text){
+            if (!activeNumericInput) return;
+            const start = activeNumericInput.selectionStart ?? activeNumericInput.value.length;
+            const end = activeNumericInput.selectionEnd ?? activeNumericInput.value.length;
+            const current = activeNumericInput.value;
+            // একটির বেশি ডট না
+            if (text === '.' && current.includes('.')) return;
+            const next = current.slice(0,start) + text + current.slice(end);
+            setActiveInputValue(next);
+            const caret = start + text.length;
+            activeNumericInput.setSelectionRange(caret, caret);
+        }
+
+        function backspaceActiveInput(){
+            if (!activeNumericInput) return;
+            const start = activeNumericInput.selectionStart ?? activeNumericInput.value.length;
+            const end = activeNumericInput.selectionEnd ?? activeNumericInput.value.length;
+            let current = activeNumericInput.value;
+            if (start !== end) {
+                current = current.slice(0,start) + current.slice(end);
+                setActiveInputValue(current);
+                activeNumericInput.setSelectionRange(start, start);
+            } else if (start > 0) {
+                current = current.slice(0,start-1) + current.slice(end);
+                setActiveInputValue(current);
+                const caret = start - 1;
+                activeNumericInput.setSelectionRange(caret, caret);
+            }
+        }
+
+        function toggleSignActiveInput(){
+            if (!activeNumericInput) return;
+            let v = activeNumericInput.value.trim();
+            if (!v) return;
+            if (v.startsWith('-')) v = v.slice(1); else v = '-' + v;
+            setActiveInputValue(v);
+        }
+
+        // বাইরে ট্যাপ করলে হাইড
+        document.addEventListener('click', function(e){
+            const kb = document.querySelector('.num-keypad');
+            if (!kb) return;
+            const isOnKeypad = e.target.closest('.num-keypad');
+            const isNumericInput = e.target.closest('input.input-cell.kg, input.input-cell.maund-rate');
+            if (!isOnKeypad && !isNumericInput) hideKeypad();
+        });
+    </script>
+
+    <!-- অন-স্ক্রিন কিবোর্ডের জন্য কোনও অতিরিক্ত HTML প্রয়োজন নেই; JS ডায়নামিকলি তৈরি করে -->
+
+    <script>
+    // ফোকাস হলে কিবোর্ড দেখান
+    const originalAddEventListeners = addEventListeners;
+    addEventListeners = function(){
+        originalAddEventListeners();
+        document.querySelectorAll('.maund-rate, .kg').forEach(input => {
+            if (!input.closest('tr').classList.contains('wholesaler-summary-row')) {
+                input.addEventListener('focus', function(){ showKeypad(this); });
+            }
+        });
+    };
     </script>
 </body>
 </html>
