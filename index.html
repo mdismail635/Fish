@@ -412,9 +412,9 @@
                     row.innerHTML = `
                         <td>${rowNumber}</td>
                         <td><input type="text" class="input-cell fish-name" value="${rowData.fishName || ''}"></td>
-                        <td><input type="number" class="input-cell maund-rate" data-row="${i}" value="${rowData.maundRate || ''}" min="0" max="999999" placeholder=""></td>
+                        <td><input type="text" class="input-cell maund-rate" data-row="${i}" value="${rowData.maundRate || ''}" placeholder=""></td>
                         <td class="rate ${rowData.calculatedRate ? '' : 'empty-cell'}">${rowData.calculatedRate ? formatNumber(rowData.calculatedRate) : ''}</td>
-                        <td><input type="number" class="input-cell kg" data-row="${i}" value="${rowData.kg || ''}" step="0.01" placeholder=""></td>
+                        <td><input type="text" class="input-cell kg" data-row="${i}" value="${rowData.kg || ''}" placeholder=""></td>
                         <td class="amount ${rowData.calculatedAmount ? '' : 'empty-cell'}">${rowData.calculatedAmount ? formatNumber(rowData.calculatedAmount) : ''}</td>
                         <td><input type="text" class="input-cell wholesaler-name" value="${rowData.wholesalerName || ''}" data-serial="${rowNumber}" placeholder=""></td>
                         <td class="wholesale-total ${rowData.calculatedWholesaleTotal ? '' : 'empty-cell'}">${rowData.calculatedWholesaleTotal ? formatNumber(rowData.calculatedWholesaleTotal) : ''}</td>
@@ -1189,8 +1189,8 @@ function resetAllData() {
             }
 
             // অন্যান্য ইনসার্ট: নির্বাচিত অংশ রিপ্লেস, না থাকলে কার্সরে ইনসার্ট
-            const start = activeNumericInput.selectionStart ?? current.length;
-            const end = activeNumericInput.selectionEnd ?? current.length;
+            const start = Number.isInteger(activeNumericInput.selectionStart) ? activeNumericInput.selectionStart : current.length;
+            const end = Number.isInteger(activeNumericInput.selectionEnd) ? activeNumericInput.selectionEnd : current.length;
             const next = current.slice(0, start) + text + current.slice(end);
             setActiveInputValue(next);
             try {
