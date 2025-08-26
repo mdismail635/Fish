@@ -185,8 +185,8 @@
         const WHOLESALER_RATE = 1.03; // সব পাইকারের জন্য 3% যোগ
         let pages = [];
         let currentPageIndex = 0;
-        // পাইকারি ভিউ স্টেট
-        let isWholesalerView = false;
+        let currentTabType = 'normal'; // 'normal' | 'wh'
+        // পাইকারি ভিউ ডাটা
         let wholesalerViewData = { tabs: [], rowsByTab: {} };
 
         const ROWS_PER_PAGE = 60;
@@ -378,33 +378,38 @@
         function updatePageTabs() {
             const pageTabs = document.getElementById('pageTabs');
             pageTabs.innerHTML = '';
-            
-            if (!isWholesalerView) {
-                pages.forEach((page, index) => {
-                    const tab = document.createElement('div');
-                    tab.className = `page-tab ${index === currentPageIndex ? 'active' : ''}`;
-                    tab.textContent = `পেজ ${index + 1}`;
-                    tab.onclick = () => {
-                        currentPageIndex = index;
-                        renderPage(currentPageIndex);
-                        updatePageTabs();
-                    };
-                    pageTabs.appendChild(tab);
-                });
-            } else {
-                // পাইকার পেজ ট্যাব
-                wholesalerViewData.tabs.forEach((name, index) => {
-                    const tab = document.createElement('div');
-                    tab.className = `page-tab ${index === currentPageIndex ? 'active' : ''}`;
-                    tab.textContent = name;
-                    tab.onclick = () => {
-                        currentPageIndex = index;
-                        renderWholesalerPage(index);
-                        updatePageTabs();
-                    };
-                    pageTabs.appendChild(tab);
-                });
-            }
+            // সর্বশেষ পাইকার ডাটা গঠন করুন
+            buildWholesalerView();
+
+            // সাধারণ পেজ ট্যাব
+            pages.forEach((page, index) => {
+                const isActive = currentTabType === 'normal' && index === currentPageIndex;
+                const tab = document.createElement('div');
+                tab.className = `page-tab ${isActive ? 'active' : ''}`;
+                tab.textContent = `পেজ ${index + 1}`;
+                tab.onclick = () => {
+                    currentTabType = 'normal';
+                    currentPageIndex = index;
+                    renderPage(currentPageIndex);
+                    updatePageTabs();
+                };
+                pageTabs.appendChild(tab);
+            });
+
+            // পাইকার পেজ ট্যাব
+            wholesalerViewData.tabs.forEach((name, index) => {
+                const isActive = currentTabType === 'wh' && index === currentPageIndex;
+                const tab = document.createElement('div');
+                tab.className = `page-tab ${isActive ? 'active' : ''}`;
+                tab.textContent = name;
+                tab.onclick = () => {
+                    currentTabType = 'wh';
+                    currentPageIndex = index;
+                    renderWholesalerPage(index);
+                    updatePageTabs();
+                };
+                pageTabs.appendChild(tab);
+            });
         }
         
         // বর্তমান পেজ রেন্ডার করুন
@@ -451,22 +456,18 @@
             updatePageTotals();
         }
 
-        // পাইকার ভিউ টগল
+        // টগল বাটন থাকলেও এখন অটো ট্যাব তৈরি হয়; টগল করলে শুধু ভিউ বদলায়
         function toggleWholesalerView(){
-            isWholesalerView = !isWholesalerView;
-            const btn = document.getElementById('toggleWhViewBtn');
-            if (isWholesalerView) {
-                btn.textContent = 'সাধারণ পেজ';
-                buildWholesalerView();
+            if (currentTabType === 'wh') {
+                currentTabType = 'normal';
                 currentPageIndex = 0;
-                updatePageTabs();
-                renderWholesalerPage(0);
-            } else {
-                btn.textContent = 'পাইকার পেজ';
-                currentPageIndex = 0;
-                updatePageTabs();
                 renderPage(0);
+            } else {
+                currentTabType = 'wh';
+                currentPageIndex = 0;
+                renderWholesalerPage(0);
             }
+            updatePageTabs();
         }
 
         // পাইকার ভিউ ডাটা প্রস্তুত
@@ -596,19 +597,35 @@
         
         // পূর্ববর্তী পেজে যান
         function prevPage() {
-            if (currentPageIndex > 0) {
-                currentPageIndex--;
-                renderPage(currentPageIndex);
-                updatePageTabs();
+            if (currentTabType === 'normal') {
+                if (currentPageIndex > 0) {
+                    currentPageIndex--;
+                    renderPage(currentPageIndex);
+                    updatePageTabs();
+                }
+            } else {
+                if (currentPageIndex > 0) {
+                    currentPageIndex--;
+                    renderWholesalerPage(currentPageIndex);
+                    updatePageTabs();
+                }
             }
         }
         
         // পরবর্তী পেজে যান
         function nextPage() {
-            if (currentPageIndex < pages.length - 1) {
-                currentPageIndex++;
-                renderPage(currentPageIndex);
-                updatePageTabs();
+            if (currentTabType === 'normal') {
+                if (currentPageIndex < pages.length - 1) {
+                    currentPageIndex++;
+                    renderPage(currentPageIndex);
+                    updatePageTabs();
+                }
+            } else {
+                if (currentPageIndex < wholesalerViewData.tabs.length - 1) {
+                    currentPageIndex++;
+                    renderWholesalerPage(currentPageIndex);
+                    updatePageTabs();
+                }
             }
         }
         
