@@ -1167,9 +1167,20 @@ function resetAllData() {
             const start = activeNumericInput.selectionStart ?? activeNumericInput.value.length;
             const end = activeNumericInput.selectionEnd ?? activeNumericInput.value.length;
             const current = activeNumericInput.value;
-            // একটির বেশি ডট না
-            if (text === '.' && current.includes('.')) return;
+            // ডট হ্যান্ডলিং: ফাঁকা বা শুধু '-' হলে '0.'/'-0.' বসান, এবং একটির বেশি ডট না
+            if (text === '.') {
+                if (current.includes('.')) return;
+                if (current === '' || current === '-') {
+                    const prefix = current === '-' ? '-0.' : '0.';
+                    setActiveInputValue(prefix);
+                    const caret0 = prefix.length;
+                    activeNumericInput.setSelectionRange(caret0, caret0);
+                    return;
+                }
+            }
+
             const next = current.slice(0,start) + text + current.slice(end);
+            if (text === '.' && (next.match(/\./g)?.length || 0) > 1) return;
             setActiveInputValue(next);
             const caret = start + text.length;
             activeNumericInput.setSelectionRange(caret, caret);
