@@ -175,6 +175,7 @@
         <button class="backup-btn" onclick="restoreData()">ডেটা রিস্টোর করুন</button>
         <button class="backup-btn" onclick="exportData()">ডেটা ডাউনলোড করুন</button>
         <button class="backup-btn" onclick="importData()">ডেটা আপলোড করুন</button>
+        <button class="backup-btn" onclick="exportCSV()">এক্সেল (CSV) ডাউনলোড</button>
         <button class="backup-btn" onclick="signInWithGoogle()">গুগল ড্রাইভে সেভ করুন</button>
         <button class="backup-btn" onclick="loadFromGoogleDrive()">গুগল ড্রাইভ থেকে লোড করুন</button>
     </div>
@@ -1268,6 +1269,86 @@ function resetAllData() {
             } catch (_) {}
             const kb = document.querySelector('.num-keypad');
             if (kb) kb.style.display = 'block';
+        }
+
+        // ================= CSV এক্সপোর্ট (Excel) =================
+        function exportCSV(){
+            const headers = ['ক্রমিক','মাছের নাম','মন দর','দর','কেজি','টাকা','পাইকার নাম','পাইকার মোট'];
+            const rows = [];
+
+            if (currentTabType === 'wh') {
+                // বর্তমান wholesaler পেজ
+                const whName = wholesalerViewData.tabs[currentPageIndex];
+                const list = wholesalerViewData.rowsByTab[whName] || [];
+                list.forEach((r, i)=>{
+                    rows.push([
+                        i+1,
+                        sanitizeCsv(r.fishName),
+                        safeNumber(r.maundRate),
+                        safeNumber(r.rate),
+                        safeNumber(r.kg),
+                        safeNumber(r.amount),
+                        sanitizeCsv(whName),
+                        ''
+                    ]);
+                });
+            } else {
+                // বর্তমান normal পেজ
+                const page = pages[currentPageIndex];
+                const seqOffset = currentPageIndex * ROWS_PER_PAGE;
+                page.rows.forEach((rowData, i)=>{
+                    if (rowData.isSummaryRow) return;
+                    rows.push([
+                        seqOffset + i + 1,
+                        sanitizeCsv(rowData.fishName || ''),
+                        safeNumber(rowData.maundRate),
+                        safeNumber(rowData.calculatedRate),
+                        safeNumber(rowData.kg),
+                        safeNumber(rowData.calculatedAmount),
+                        sanitizeCsv(rowData.wholesalerName || ''),
+                        ''
+                    ]);
+                });
+            }
+
+            const csv = [headers.join(',')]
+                .concat(rows.map(r=>r.map(csvCell).join(',')))
+                .join('\r\n');
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const nameSuffix = currentTabType === 'wh' ? '_wholesaler' : `_page_${currentPageIndex+1}`;
+            a.download = `fish_export${nameSuffix}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showConfirmation('CSV ডাউনলোড হয়েছে। এক্সেলে ওপেন করুন।');
+        }
+
+        function csvCell(val){
+            // সংখ্যাকে যেমন আছে তেমন রাখি; স্ট্রিং হলে কোট করি এবং কোট ডাবল করি
+            if (typeof val === 'number') return String(val);
+            if (val === null || val === undefined) return '';
+            const s = String(val);
+            if (/[",\r\n]/.test(s)) {
+                return '"' + s.replace(/"/g,'""') + '"';
+            }
+            return s;
+        }
+
+        function sanitizeCsv(s){
+            s = s || '';
+            // Excel ফর্মুলা ইনজেকশন ঠেকাতে =, +, -, @ আগে ' যোগ করুন
+            if (/^[=+\-@]/.test(s)) return "'" + s;
+            return s;
+        }
+
+        function safeNumber(v){
+            const n = parseFloat(v);
+            return isNaN(n) ? '' : Number(n.toFixed(2));
         }
 
         function hideKeypad(){
