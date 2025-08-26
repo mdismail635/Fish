@@ -122,6 +122,7 @@
         <button class="page-btn" onclick="nextPage()">পরবর্তী</button>
         <button class="page-btn" onclick="confirmDeleteCurrentPage()" style="background-color: #f44336;">পেজ ডিলেট</button>
         <button class="page-btn" onclick="confirmResetAllData()" style="background-color: #ff9800;">সব ডাটা রিসেট</button>
+        <button class="page-btn" id="toggleWhViewBtn" onclick="toggleWholesalerView()" style="background-color:#607d8b;">পাইকার পেজ</button>
     </div>
     </div>
 
@@ -184,6 +185,10 @@
         const WHOLESALER_RATE = 1.03; // সব পাইকারের জন্য 3% যোগ
         let pages = [];
         let currentPageIndex = 0;
+        // পাইকারি ভিউ স্টেট
+        let isWholesalerView = false;
+        let wholesalerViewData = { tabs: [], rowsByTab: {} };
+
         const ROWS_PER_PAGE = 60;
         let currentDate = '';
         let allWholesalers = {};
@@ -374,17 +379,32 @@
             const pageTabs = document.getElementById('pageTabs');
             pageTabs.innerHTML = '';
             
-            pages.forEach((page, index) => {
-                const tab = document.createElement('div');
-                tab.className = `page-tab ${index === currentPageIndex ? 'active' : ''}`;
-                tab.textContent = `পেজ ${index + 1}`;
-                tab.onclick = () => {
-                    currentPageIndex = index;
-                    renderPage(currentPageIndex);
-                    updatePageTabs();
-                };
-                pageTabs.appendChild(tab);
-            });
+            if (!isWholesalerView) {
+                pages.forEach((page, index) => {
+                    const tab = document.createElement('div');
+                    tab.className = `page-tab ${index === currentPageIndex ? 'active' : ''}`;
+                    tab.textContent = `পেজ ${index + 1}`;
+                    tab.onclick = () => {
+                        currentPageIndex = index;
+                        renderPage(currentPageIndex);
+                        updatePageTabs();
+                    };
+                    pageTabs.appendChild(tab);
+                });
+            } else {
+                // পাইকার পেজ ট্যাব
+                wholesalerViewData.tabs.forEach((name, index) => {
+                    const tab = document.createElement('div');
+                    tab.className = `page-tab ${index === currentPageIndex ? 'active' : ''}`;
+                    tab.textContent = name;
+                    tab.onclick = () => {
+                        currentPageIndex = index;
+                        renderWholesalerPage(index);
+                        updatePageTabs();
+                    };
+                    pageTabs.appendChild(tab);
+                });
+            }
         }
         
         // বর্তমান পেজ রেন্ডার করুন
@@ -429,6 +449,84 @@
             
             // ক্যালকুলেশন আপডেট করুন
             updatePageTotals();
+        }
+
+        // পাইকার ভিউ টগল
+        function toggleWholesalerView(){
+            isWholesalerView = !isWholesalerView;
+            const btn = document.getElementById('toggleWhViewBtn');
+            if (isWholesalerView) {
+                btn.textContent = 'সাধারণ পেজ';
+                buildWholesalerView();
+                currentPageIndex = 0;
+                updatePageTabs();
+                renderWholesalerPage(0);
+            } else {
+                btn.textContent = 'পাইকার পেজ';
+                currentPageIndex = 0;
+                updatePageTabs();
+                renderPage(0);
+            }
+        }
+
+        // পাইকার ভিউ ডাটা প্রস্তুত
+        function buildWholesalerView(){
+            const map = {};
+            pages.forEach(page => {
+                page.rows.forEach(row => {
+                    if (row.isSummaryRow) return;
+                    const name = (row.wholesalerName || '').trim();
+                    if (!name) return;
+                    if (!map[name]) map[name] = [];
+                    map[name].push({
+                        fishName: row.fishName || '',
+                        maundRate: row.maundRate || '',
+                        kg: row.kg || '',
+                        rate: row.calculatedRate || 0,
+                        amount: row.calculatedAmount || 0
+                    });
+                });
+            });
+            const tabs = Object.keys(map).sort((a,b)=>a.localeCompare(b));
+            wholesalerViewData = { tabs: tabs, rowsByTab: map };
+        }
+
+        // পাইকার ভিউ রেন্ডার
+        function renderWholesalerPage(index){
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            const wholesalerName = wholesalerViewData.tabs[index];
+            if (!wholesalerName) return;
+            const rows = wholesalerViewData.rowsByTab[wholesalerName] || [];
+            document.getElementById('currentPage').textContent = wholesalerName;
+
+            let totalKg = 0;
+            let totalAmount = 0;
+
+            rows.forEach((r, i) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${i+1}</td>
+                    <td>${r.fishName}</td>
+                    <td>${r.maundRate}</td>
+                    <td>${r.rate ? formatNumber(r.rate) : ''}</td>
+                    <td>${r.kg}</td>
+                    <td>${r.amount ? formatNumber(r.amount) : ''}</td>
+                    <td>${wholesalerName}</td>
+                    <td></td>
+                `;
+                tableBody.appendChild(row);
+                const kgv = parseFloat(r.kg) || 0;
+                const amt = parseFloat(r.amount) || 0;
+                if (kgv>0) totalKg += kgv;
+                if (amt>0) totalAmount += amt;
+            });
+
+            // ফুটার আপডেট
+            document.getElementById('totalKg').textContent = formatNumber(totalKg) || '0';
+            document.getElementById('totalTk').textContent = formatNumber(totalAmount) || '0';
+            document.getElementById('sumTk').textContent = formatNumber(totalAmount) || '0';
+            // পাইকার টোটাল দেখানো হবে না এখানে, গ্র্যান্ড টোটাল অপরিবর্তিত
         }
         
         // ইভেন্ট লিসেনার যোগ করুন
