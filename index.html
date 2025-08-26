@@ -1164,30 +1164,34 @@ function resetAllData() {
 
         function insertToActiveInput(text){
             if (!activeNumericInput) return;
-            let start = activeNumericInput.selectionStart ?? activeNumericInput.value.length;
-            let end = activeNumericInput.selectionEnd ?? activeNumericInput.value.length;
             const current = activeNumericInput.value;
-            // ডট হ্যান্ডলিং: ফাঁকা বা শুধু '-' হলে '0.'/'-0.' বসান, এবং একটির বেশি ডট না
+
+            // দশমিক সবসময় অ্যাপেন্ড: আগের লেখা মুছবে না
             if (text === '.') {
                 if (current.includes('.')) return;
-                // সিলেক্ট-অল থাকলে রিপ্লেস নয়, শেষে অ্যাপেন্ড
-                if (start !== end) {
-                    start = end = current.length;
+                if (current === '') {
+                    setActiveInputValue('0.');
+                } else if (current === '-') {
+                    setActiveInputValue('-0.');
+                } else {
+                    setActiveInputValue(current + '.');
                 }
-                if (current === '' || current === '-') {
-                    const prefix = current === '-' ? '-0.' : '0.';
-                    setActiveInputValue(prefix);
-                    const caret0 = prefix.length;
-                    try { activeNumericInput.setSelectionRange(caret0, caret0); } catch (_) {}
-                    return;
-                }
+                try {
+                    const pos = activeNumericInput.value.length;
+                    activeNumericInput.setSelectionRange(pos, pos);
+                } catch (_) {}
+                return;
             }
 
-            const next = current.slice(0,start) + text + current.slice(end);
-            if (text === '.' && (next.match(/\./g)?.length || 0) > 1) return;
+            // অন্যান্য ইনসার্ট: নির্বাচিত অংশ রিপ্লেস, না থাকলে কার্সরে ইনসার্ট
+            const start = activeNumericInput.selectionStart ?? current.length;
+            const end = activeNumericInput.selectionEnd ?? current.length;
+            const next = current.slice(0, start) + text + current.slice(end);
             setActiveInputValue(next);
-            const caret = start + text.length;
-            try { activeNumericInput.setSelectionRange(caret, caret); } catch (_) {}
+            try {
+                const caret = start + text.length;
+                activeNumericInput.setSelectionRange(caret, caret);
+            } catch (_) {}
         }
 
         function backspaceActiveInput(){
