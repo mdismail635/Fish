@@ -1219,10 +1219,26 @@ function resetAllData() {
         originalAddEventListeners();
         document.querySelectorAll('.maund-rate, .kg').forEach(input => {
             if (!input.closest('tr').classList.contains('wholesaler-summary-row')) {
-                input.addEventListener('focus', function(){ showKeypad(this); });
+                prepareNumericInput(input);
             }
         });
     };
+
+    function prepareNumericInput(input){
+        // মোবাইল কিবোর্ড বন্ধ করতে
+        input.setAttribute('inputmode', 'none');
+        input.setAttribute('readonly', 'readonly');
+
+        // ট্যাপ/ক্লিক ইন্টারসেপ্ট করে আমাদের কিবোর্ড দেখাই
+        const openPad = (e) => {
+            e.preventDefault();
+            try { input.focus({ preventScroll: true }); } catch(_) { input.focus(); }
+            showKeypad(input);
+        };
+        input.addEventListener('touchstart', openPad, { passive: false });
+        input.addEventListener('mousedown', openPad);
+        input.addEventListener('focus', function(){ showKeypad(this); });
+    }
     </script>
 </body>
 </html>
